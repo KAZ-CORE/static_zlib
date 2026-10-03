@@ -18,19 +18,23 @@ case "$arch_build_target" in
 esac
 
 
-rm -rf ${traget_output}
-mkdir -p ${traget_output}
+rm -rf "${traget_output}"
+mkdir -p "${traget_output}"
+mkdir -p "${headers_output}"
 
-git clone ${addr_repository}
+git clone "${addr_repository}"
 
+cp "${path_zlib}"/*.h "${headers_output}/"
 
 cmake \
     -S "${path_zlib}" \
-    -B "build/${os_build_target}/${arch_build_target}" \
+    -B "${traget_output}" \
     -DCMAKE_C_COMPILER="${zigfile};cc;-target;${build_target}" \
     -DCMAKE_ASM_COMPILER="${zigfile};cc;-target;${build_target}" \
     -DBUILD_SHARED_LIBS=OFF \
-    -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
+    -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+    -DCMAKE_C_FLAGS="-fno-sanitize=all"
 
+cmake --build "${traget_output}" \
+    --target zlibstatic -j"$(nproc)"
 
-cmake --build ${traget_output} --target zlibstatic -j$(nproc)
